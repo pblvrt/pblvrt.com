@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pblvrt — Pablo Voorvaart</title>
+  <meta name="description" content="Builder. AI agents, Ethereum infra, and tools that ship.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --border: #1e1e1e;
+      --border-hover: #2a2a2a;
+      --text: #e8e8e8;
+      --text-2: #888888;
+      --text-3: #555555;
+      --accent: #c8ff00;
+      --accent-dim: rgba(200, 255, 0, 0.08);
+      --mono: 'DM Mono', 'SF Mono', monospace;
+      --serif: 'Instrument Serif', Georgia, serif;
+    }
+
+    body {
+      font-family: var(--mono);
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Grain overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .page {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ---- HEADER ---- */
+    header {
+      padding: 80px 0 0;
+      position: relative;
+    }
+
+    .name {
+      font-family: var(--serif);
+      font-size: clamp(48px, 8vw, 72px);
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .name em {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    .tagline {
+      font-size: 14px;
+      color: var(--text-2);
+      margin-top: 16px;
+      font-weight: 300;
+      letter-spacing: 0.01em;
+      line-height: 1.6;
+    }
+
+    .tagline strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* ---- SOCIALS ---- */
+    .socials {
+      display: flex;
+      gap: 6px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .social-link {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-3);
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .social-link:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .social-link svg {
+      width: 13px;
+      height: 13px;
+      opacity: 0.6;
+    }
+
+    .social-link:hover svg { opacity: 1; }
+
+    /* ---- DIVIDER ---- */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+      position: relative;
+    }
+
+    .divider::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 40px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    /* ---- SECTION ---- */
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 24px;
+    }
+
+    /* ---- PROJECT GRID ---- */
+    .projects {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .project {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: start;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      transition: all 0.15s;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .project:first-child {
+      border-top: 1px solid var(--border);
+    }
+
+    .project::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      right: -24px;
+      top: -1px;
+      bottom: -1px;
+      background: var(--accent-dim);
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: -1;
+    }
+
+    .project:hover::before { opacity: 1; }
+
+    .project:hover .project-name { color: var(--accent); }
+    .project:hover .project-arrow { opacity: 1; transform: translate(2px, -2px); }
+
+    .project-name {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      transition: color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .project-tag {
+      font-size: 9px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid rgba(200, 255, 0, 0.15);
+      flex-shrink: 0;
+    }
+
+    .project-desc {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 6px;
+      line-height: 1.5;
+      font-weight: 300;
+      max-width: 480px;
+    }
+
+    .project-domain {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 4px;
+      opacity: 0.5;
+    }
+
+    .project-arrow {
+      color: var(--text-3);
+      opacity: 0;
+      transition: all 0.2s;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .project-arrow svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ---- FOOTER ---- */
+    footer {
+      padding: 48px 0 64px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-3);
+      font-weight: 300;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(200, 255, 0, 0.4);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ---- ANIMATIONS ---- */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .d1 { animation-delay: 0.05s; }
+    .d2 { animation-delay: 0.1s; }
+    .d3 { animation-delay: 0.15s; }
+    .d4 { animation-delay: 0.2s; }
+    .d5 { animation-delay: 0.25s; }
+    .d6 { animation-delay: 0.3s; }
+    .d7 { animation-delay: 0.35s; }
+    .d8 { animation-delay: 0.4s; }
+    .d9 { animation-delay: 0.45s; }
+    .d10 { animation-delay: 0.5s; }
+    .d11 { animation-delay: 0.55s; }
+    .d12 { animation-delay: 0.6s; }
+    .d13 { animation-delay: 0.65s; }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 520px) {
+      header { padding-top: 48px; }
+      .project { grid-template-columns: 1fr; }
+      .project-arrow { display: none; }
+      footer { flex-direction: column; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <header>
+      <h1 class="name fade-in">Pablo<br><em>Voorvaart</em></h1>
+      <p class="tagline fade-in d2">Building with <strong>AI agents</strong> and <strong>Ethereum</strong>.<br>Shipping tools, infra, and experiments from a single VPS.</p>
+      <div class="socials fade-in d3">
+        <a href="https://github.com/pblvrt" class="social-link" target="_blank">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          pblvrt
+        </a>
+        <a href="https://x.com/paborvaart" class="social-link" target="_blank">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          @paborvaart
+        </a>
+        <a href="mailto:pablo@streameth.org" class="social-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          pablo@streameth.org
+        </a>
+      </div>
+    </header>
+
+    <div class="divider fade-in d4"></div>
+
+    <section>
+      <div class="section-label fade-in d5">Projects</div>
+      <div class="projects">
+
+        <a href="https://scout.pblvrt.com" target="_blank" class="project fade-in d6">
+          <div>
+            <div class="project-name">Scout <span class="project-tag">New</span></div>
+            <div class="project-desc">AI-powered SDR agent. Finds leads, scores them against your ICP, runs personalized outreach — powered by Claude.</div>
+            <div class="project-domain">scout.pblvrt.com</div>
+          </div>
+          <div class="project-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
+        </a>
+
+        <a href="https://streameth.org" target="_blank" class="project fade-in d7">
+          <div>
+            <div class="project-name">StreamETH</div>
+            <div class="project-desc">Livestreaming and video infrastructure for Ethereum events.</div>
+            <div class="project-domain">streameth.org</div>
+          </div>
+          <div class="project-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
+        </a>
+
+        <a href="https://oneshotapp.io" target="_blank" class="project fade-in d8">
+          <div>
+            <div class="project-name">Oneshot</div>
+            <div class="project-desc">Build and deploy web apps through AI conversation.</div>
+            <div class="project-domain">oneshotapp.io</div>
+          </div>
+          <div class="project-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
+        </a>
+
+        <a href="https://usecaselab.org" target="_blank" class="project fade-in d9">
+          <div>
+            <div class="project-name">Use Case Lab</div>
+            <div class="project-desc">122 Ethereum use case ideas across 16 domains.</div>
+            <div class="project-domain">usecaselab.org</div>
+          </div>
+          <div class="project-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
+        </a>
+
+        <a href="https://vibecourse.io" target="_blank" class="project fade-in d10">
+          <div>
+            <div class="project-name">Vibecourse</div>
+            <div class="project-desc">AI-powered course creation platform.</div>
+            <div class="project-domain">vibecourse.io</div>
+          </div>
+          <div class="project-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
+        </a>
+
+        <a href="https://app.recall.pblvrt.com" target="_blank" class="project fade-in d11">
+          <div>
+            <div class="project-name">Recall</div>
+            <div class="project-desc">AI-powered meeting recall and notes.</div>
+            <div class="project-domain">app.recall.pblvrt.com</div>
+          </div>
+          <div class="project-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
+        </a>
+
+        <a href="https://x402.pblvrt.com" target="_blank" class="project fade-in d12">
+          <div>
+            <div class="project-name">x402</div>
+            <div class="project-desc">Experimental x402 payment protocol implementation.</div>
+            <div class="project-domain">x402.pblvrt.com</div>
+          </div>
+          <div class="project-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
+        </a>
+
+        <a href="https://nextcloud.pblvrt.com" target="_blank" class="project fade-in d12">
+          <div>
+            <div class="project-name">Nextcloud</div>
+            <div class="project-desc">Self-hosted cloud storage and productivity.</div>
+            <div class="project-domain">nextcloud.pblvrt.com</div>
+          </div>
+          <div class="project-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
+        </a>
+
+        <a href="https://coolify.pblvrt.com" target="_blank" class="project fade-in d13">
+          <div>
+            <div class="project-name">Coolify</div>
+            <div class="project-desc">Self-hosted PaaS — everything runs from here.</div>
+            <div class="project-domain">coolify.pblvrt.com</div>
+          </div>
+          <div class="project-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
+        </a>
+
+      </div>
+    </section>
+
+    <div class="divider fade-in d13"></div>
+
+    <footer class="fade-in d13">
+      <span>pblvrt.com</span>
+      <div class="status">
+        <div class="status-dot"></div>
+        All systems on one VPS
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

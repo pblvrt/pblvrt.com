@@ -1,393 +1,353 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>pblvrt</title>
-  <meta name="description" content="Builder. AI agents, Ethereum infra, and tools that ship.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pablo · AI Solutions Architect</title>
+<meta name="description" content="Pablo (pblvrt): AI solutions architect. Senior Solutions Architect at the Ethereum Foundation, founder of StreamETH. I design agents and automated systems that plug into a team's real tools.">
+<meta property="og:title" content="Pablo · AI Solutions Architect">
+<meta property="og:description" content="I turn messy workflows into automated systems: AI agents, video infrastructure and the platforms that run them.">
+<meta property="og:url" content="https://pblvrt.com">
+<meta name="theme-color" content="#0b0b0f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@1,6..72,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0b0f;--card:#121219;--card-2:#171720;--line:rgba(255,255,255,.07);--line-2:rgba(255,255,255,.14);
+  --text:#f2f2f5;--text-2:#a1a1b0;--text-3:#6b6b7d;
+  --violet:#a78bfa;--blue:#60a5fa;--green:#34d399;--orange:#fb923c;
+  --sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;--serif:'Newsreader',Georgia,serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.6}
+body::before{content:'';position:fixed;inset:-20% -10% auto;height:70vh;background:radial-gradient(ellipse at 30% 0%,rgba(167,139,250,.14),transparent 60%),radial-gradient(ellipse at 80% 10%,rgba(96,165,250,.10),transparent 55%);pointer-events:none;z-index:-1}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1040px;margin:0 auto;padding:0 24px}
 
-    :root {
-      --bg: #0b0b0f;
-      --card: #13131a;
-      --card-hover: #1a1a24;
-      --border: rgba(255,255,255,0.06);
-      --border-hover: rgba(255,255,255,0.12);
-      --text: #f0f0f0;
-      --text-2: #8a8a9a;
-      --text-3: #55556a;
-      --accent: #a78bfa;
-      --accent-2: #60a5fa;
-      --accent-3: #34d399;
-      --accent-4: #fb923c;
-      --mono: 'Space Mono', monospace;
-      --serif: 'Newsreader', Georgia, serif;
-    }
+/* nav */
+nav{position:sticky;top:0;z-index:10;backdrop-filter:blur(12px);background:rgba(11,11,15,.72);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.logo{font-family:var(--mono);font-weight:500;font-size:14px}
+.logo span{color:var(--violet)}
+.nav-links{display:flex;gap:28px;font-size:14px;color:var(--text-2)}
+.nav-links a:hover{color:var(--text)}
 
-    body {
-      font-family: var(--mono);
-      background: var(--bg);
-      color: var(--text);
-      -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
-    }
+/* hero */
+.hero{padding:110px 0 80px}
+.status{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--green);border:1px solid rgba(52,211,153,.25);background:rgba(52,211,153,.06);padding:6px 12px;border-radius:999px;margin-bottom:28px}
+.status i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+h1{font-size:clamp(38px,6vw,68px);line-height:1.05;letter-spacing:-.035em;font-weight:700;max-width:880px}
+h1 em{font-family:var(--serif);font-weight:400;font-style:italic;background:linear-gradient(120deg,var(--violet),var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.08em}
+.lede{font-size:clamp(17px,2vw,20px);color:var(--text-2);max-width:700px;margin-top:26px}
+.lede b{color:var(--text);font-weight:500}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:38px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:10px;font-size:15px;font-weight:500;border:1px solid var(--line-2);transition:.2s}
+.btn:hover{border-color:rgba(255,255,255,.3);background:var(--card)}
+.btn.primary{background:var(--text);color:#0b0b0f;border-color:var(--text)}
+.btn.primary:hover{background:#fff}
+.btn svg{width:16px;height:16px}
+.proof{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:72px}
+.proof div{background:var(--bg);padding:22px 20px}
+.proof b{display:block;font-size:26px;font-weight:600;letter-spacing:-.02em}
+.proof span{font-size:13px;color:var(--text-3)}
 
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 9999;
-    }
+/* sections */
+section{padding:90px 0;border-top:1px solid var(--line)}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--violet);margin-bottom:14px}
+h2{font-size:clamp(28px,3.6vw,40px);letter-spacing:-.025em;line-height:1.15;font-weight:600;max-width:720px}
+.sub{color:var(--text-2);margin-top:14px;max-width:640px}
 
-    a { color: inherit; text-decoration: none; }
+/* how I work */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:44px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px}
+.step .n{font-family:var(--mono);font-size:12px;color:var(--text-3)}
+.step h3{font-size:17px;font-weight:600;margin:10px 0 8px}
+.step p{font-size:14px;color:var(--text-2)}
 
-    .page {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 60px 20px 48px;
-    }
+/* case studies */
+.cases{display:grid;gap:16px;margin-top:44px}
+.case{display:grid;grid-template-columns:1.05fr 1fr;gap:0;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:border-color .25s}
+.case:hover{border-color:var(--line-2)}
+.case .body{padding:34px}
+.tagrow{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.tag{font-family:var(--mono);font-size:11px;color:var(--text-2);border:1px solid var(--line-2);padding:3px 8px;border-radius:6px}
+.tag.c{color:var(--violet);border-color:rgba(167,139,250,.35)}
+.case h3{font-size:24px;letter-spacing:-.02em;font-weight:600}
+.case .role{font-size:13px;color:var(--text-3);margin-top:4px}
+.case dl{margin-top:20px;display:grid;gap:14px}
+.case dt{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
+.case dd{font-size:15px;color:var(--text-2);margin-top:3px}
+.case dd b{color:var(--text);font-weight:500}
+.case .link{display:inline-flex;gap:6px;margin-top:22px;font-size:14px;color:var(--blue)}
+.case .link:hover{text-decoration:underline}
+.diagram{background:var(--card-2);border-left:1px solid var(--line);padding:34px 28px;display:flex;flex-direction:column;justify-content:center;gap:10px;font-family:var(--mono);font-size:12.5px}
+.diagram .lbl{font-size:11px;color:var(--text-3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.flow{display:flex;flex-direction:column;align-items:stretch;gap:0}
+.node{border:1px solid var(--line-2);background:var(--bg);border-radius:9px;padding:10px 12px;color:var(--text)}
+.node small{display:block;color:var(--text-3);font-size:11px;margin-top:2px}
+.node.hl{border-color:rgba(167,139,250,.45);box-shadow:0 0 0 3px rgba(167,139,250,.06)}
+.arrow{height:18px;margin-left:22px;border-left:1px dashed var(--line-2)}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.row.two{grid-template-columns:1fr 1fr}
 
-    /* ---- HEADER ---- */
-    .header {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: end;
-      gap: 24px;
-      margin-bottom: 40px;
-    }
+/* experience */
+.xp{margin-top:40px;border-top:1px solid var(--line)}
+.xp-item{display:grid;grid-template-columns:170px 1fr;gap:24px;padding:26px 0;border-bottom:1px solid var(--line)}
+.xp-item .when{font-family:var(--mono);font-size:13px;color:var(--text-3);padding-top:3px}
+.xp-item h3{font-size:18px;font-weight:600}
+.xp-item h3 span{color:var(--text-3);font-weight:400}
+.xp-item p{color:var(--text-2);font-size:15px;margin-top:6px;max-width:680px}
 
-    .name {
-      font-family: var(--serif);
-      font-size: clamp(40px, 7vw, 56px);
-      font-weight: 400;
-      font-style: italic;
-      letter-spacing: -0.02em;
-      line-height: 1;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+/* stack */
+.stack{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:40px}
+.stack div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+.stack h4{font-size:14px;font-weight:600;margin-bottom:12px}
+.stack ul{list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.stack li{font-family:var(--mono);font-size:12px;color:var(--text-2);background:var(--bg);border:1px solid var(--line);padding:4px 8px;border-radius:6px}
 
-    .tagline {
-      font-size: 12px;
-      color: var(--text-3);
-      font-weight: 400;
-      line-height: 1.5;
-      max-width: 280px;
-    }
+/* more */
+.more{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:40px}
+.mini{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;transition:.2s;display:flex;flex-direction:column}
+.mini:hover{border-color:var(--line-2);background:var(--card-2)}
+.mini h4{font-size:16px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.mini h4 span{color:var(--text-3);font-size:14px;transition:.2s}
+.mini:hover h4 span{color:var(--text);transform:translate(2px,-2px)}
+.mini p{font-size:14px;color:var(--text-2);margin-top:8px;flex:1}
+.mini code{font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:14px}
 
-    .socials {
-      display: flex;
-      gap: 4px;
-    }
+/* contact */
+.contact{text-align:center;padding:110px 0}
+.contact h2{margin:0 auto}
+.contact .sub{margin:16px auto 0}
+.contact .cta{justify-content:center}
+footer{border-top:1px solid var(--line);padding:28px 0;font-family:var(--mono);font-size:12px;color:var(--text-3)}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
-    .social-link {
-      width: 36px;
-      height: 36px;
-      display: grid;
-      place-items: center;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text-3);
-      transition: all 0.2s;
-    }
-
-    .social-link:hover {
-      color: var(--text);
-      border-color: var(--border-hover);
-      background: var(--card);
-    }
-
-    .social-link svg { width: 15px; height: 15px; }
-
-    /* ---- BENTO GRID ---- */
-    .bento {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-auto-rows: minmax(0, auto);
-      gap: 8px;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      cursor: pointer;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--card-accent, var(--accent));
-      opacity: 0;
-      transition: opacity 0.25s;
-    }
-
-    .card:hover {
-      background: var(--card-hover);
-      border-color: var(--border-hover);
-      transform: translateY(-2px);
-    }
-
-    .card:hover::before { opacity: 1; }
-
-    .card-wide { grid-column: span 2; }
-    .card-tall { grid-row: span 2; }
-
-    .card-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      margin-bottom: 16px;
-      font-size: 20px;
-    }
-
-    .card-name {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .card-tag {
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(167, 139, 250, 0.15);
-      color: var(--accent);
-    }
-
-    .card-desc {
-      font-size: 11px;
-      color: var(--text-2);
-      line-height: 1.55;
-      flex: 1;
-    }
-
-    .card-domain {
-      font-size: 10px;
-      color: var(--text-3);
-      margin-top: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .card-arrow {
-      opacity: 0;
-      transition: all 0.2s;
-      color: var(--text-3);
-    }
-
-    .card-arrow svg { width: 12px; height: 12px; }
-
-    .card:hover .card-arrow {
-      opacity: 1;
-      transform: translate(2px, -2px);
-    }
-
-    /* Card accent colors */
-    .card-scout { --card-accent: var(--accent); }
-    .card-scout .card-icon { background: rgba(167, 139, 250, 0.1); }
-    .card-streameth { --card-accent: var(--accent-2); }
-    .card-streameth .card-icon { background: rgba(96, 165, 250, 0.1); }
-    .card-oneshot { --card-accent: var(--accent-3); }
-    .card-oneshot .card-icon { background: rgba(52, 211, 153, 0.1); }
-    .card-ucl { --card-accent: var(--accent-4); }
-    .card-ucl .card-icon { background: rgba(251, 146, 60, 0.1); }
-    .card-vibecourse { --card-accent: #f472b6; }
-    .card-vibecourse .card-icon { background: rgba(244, 114, 182, 0.1); }
-    .card-recall { --card-accent: var(--accent-2); }
-    .card-recall .card-icon { background: rgba(96, 165, 250, 0.1); }
-    .card-x402 { --card-accent: var(--accent-3); }
-    .card-x402 .card-icon { background: rgba(52, 211, 153, 0.1); }
-    .card-spinmoji { --card-accent: #facc15; }
-    .card-spinmoji .card-icon { background: rgba(250, 204, 21, 0.1); }
-
-    /* ---- FOOTER ---- */
-    footer {
-      margin-top: 32px;
-      padding: 20px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 10px;
-      color: var(--text-3);
-    }
-
-    .status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .status-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--accent-3);
-      box-shadow: 0 0 6px rgba(52, 211, 153, 0.5);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-
-    /* ---- ANIMATIONS ---- */
-    .fade-in {
-      opacity: 0;
-      transform: translateY(8px) scale(0.98);
-      animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @keyframes fadeUp {
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .d1 { animation-delay: 0.04s; }
-    .d2 { animation-delay: 0.08s; }
-    .d3 { animation-delay: 0.12s; }
-    .d4 { animation-delay: 0.16s; }
-    .d5 { animation-delay: 0.2s; }
-    .d6 { animation-delay: 0.24s; }
-    .d7 { animation-delay: 0.28s; }
-    .d8 { animation-delay: 0.32s; }
-    .d9 { animation-delay: 0.36s; }
-
-    /* ---- RESPONSIVE ---- */
-    @media (max-width: 600px) {
-      .page { padding: 40px 16px 32px; }
-      .header { grid-template-columns: 1fr; gap: 16px; }
-      .bento { grid-template-columns: 1fr 1fr; }
-      .card-wide { grid-column: span 2; }
-      .card-tall { grid-row: span 1; }
-    }
-
-    @media (max-width: 380px) {
-      .bento { grid-template-columns: 1fr; }
-      .card-wide { grid-column: span 1; }
-    }
-  </style>
+@media (max-width:860px){
+  .nav-links{display:none}
+  .proof{grid-template-columns:repeat(2,1fr)}
+  .steps,.stack{grid-template-columns:1fr 1fr}
+  .case{grid-template-columns:1fr}
+  .diagram{border-left:0;border-top:1px solid var(--line)}
+  .more{grid-template-columns:1fr 1fr}
+  .xp-item{grid-template-columns:1fr;gap:6px}
+}
+@media (max-width:560px){
+  .steps,.stack,.more{grid-template-columns:1fr}
+  .hero{padding:70px 0 60px}
+}
+</style>
 </head>
 <body>
-  <div class="page">
 
-    <div class="header fade-in">
-      <div>
-        <h1 class="name">pblvrt</h1>
-        <p class="tagline">AI agents, Ethereum infra, and things that ship.</p>
+<nav><div class="wrap">
+  <a class="logo" href="#">pblvrt<span>.</span></a>
+  <div class="nav-links">
+    <a href="#approach">Approach</a><a href="#work">Work</a><a href="#experience">Experience</a><a href="#stack">Stack</a><a href="#contact">Contact</a>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="status"><i></i>Open to AI Solutions Architect roles · Remote, Europe</div>
+  <h1>I turn messy workflows into <em>systems that run themselves.</em></h1>
+  <p class="lede">I'm Pablo, a solutions architect who designs and ships <b>AI agents, automation and video infrastructure</b> that plug into a team's real tools. Senior Solutions Architect at the <b>Ethereum Foundation</b>, founder of <b>StreamETH</b>, and 8+ years taking projects from discovery to production.</p>
+  <div class="cta">
+    <a class="btn primary" href="#contact">Get in touch</a>
+    <a class="btn" href="#work">See the work</a>
+    <a class="btn" href="https://github.com/pblvrt" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2 0-.3-.5-1.5.2-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.5.4.9 1.1.9 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg>GitHub</a>
+  </div>
+  <div class="proof">
+    <div><b>8+ yrs</b><span>shipping for clients &amp; teams</span></div>
+    <div><b>5</b><span>Devcon / Devconnect editions engineered</span></div>
+    <div><b>3×</b><span>founder &amp; CTO</span></div>
+    <div><b>EU patent</b><span>on a quoting tool I built</span></div>
+  </div>
+</div></header>
+
+<section id="approach"><div class="wrap">
+  <div class="eyebrow">How I work</div>
+  <h2>From a whiteboard conversation to a system people actually use.</h2>
+  <p class="sub">Most AI projects stall between the demo and the workflow. My job is closing that gap, end to end.</p>
+  <div class="steps">
+    <div class="step"><div class="n">01</div><h3>Discover</h3><p>Sit with the team, map the real process, and find the steps that cost the most time or break most often.</p></div>
+    <div class="step"><div class="n">02</div><h3>Architect</h3><p>Pick the simplest design that works: which agent, which tools, where humans approve, and how it fails safely.</p></div>
+    <div class="step"><div class="n">03</div><h3>Build &amp; integrate</h3><p>Ship it into the tools people already use (CRMs, chat, calendars, cloud) instead of yet another dashboard.</p></div>
+    <div class="step"><div class="n">04</div><h3>Operate</h3><p>Deploy, monitor and iterate. Self-hosted where it makes sense, with costs and limits people can see.</p></div>
+  </div>
+</div></section>
+
+<section id="work"><div class="wrap">
+  <div class="eyebrow">Selected work</div>
+  <h2>Case studies</h2>
+  <p class="sub">Problem, architecture, outcome. A mix of production systems for large events and AI products I've designed and built.</p>
+
+  <div class="cases">
+
+    <article class="case">
+      <div class="body">
+        <div class="tagrow"><span class="tag c">Video infrastructure</span><span class="tag">Live events</span><span class="tag">Automation</span></div>
+        <h3>Devcon &amp; Devconnect video production</h3>
+        <div class="role">Ethereum Foundation · Senior Solutions Architect · 2022–2026</div>
+        <dl>
+          <dt>Problem</dt><dd>Ethereum's flagship conferences run hundreds of talks across many stages in a new country every year. Every one has to be recorded, streamed and published.</dd>
+          <dt>What I built</dt><dd>Led <b>video production engineering for five editions</b>: Amsterdam, Bogotá, Istanbul, Thailand and Argentina. Built the pipelines that take each stage from schedule to livestream to a published recording, including automated per-talk intro renders driven by the event schedule.</dd>
+          <dt>Outcome</dt><dd>A repeatable production stack the team reuses edition after edition, run by a small crew.</dd>
+        </dl>
       </div>
-      <div class="socials">
-        <a href="https://github.com/pblvrt" class="social-link" target="_blank" title="GitHub">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-        </a>
-        <a href="https://x.com/pblvrt" class="social-link" target="_blank" title="X">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        </a>
+      <div class="diagram">
+        <div class="lbl">Pipeline</div>
+        <div class="flow">
+          <div class="node">Event schedule <small>talks · stages · speakers</small></div><div class="arrow"></div>
+          <div class="node hl">Automated intro renders <small>synced every 30 min</small></div><div class="arrow"></div>
+          <div class="row"><div class="node">Stage A</div><div class="node">Stage B</div><div class="node">Stage …</div></div><div class="arrow"></div>
+          <div class="node">Livestream → clips → published VOD</div>
+        </div>
       </div>
-    </div>
+    </article>
 
-    <div class="bento">
-
-      <a href="https://scout.pblvrt.com" target="_blank" class="card card-wide card-scout fade-in d1">
-        <div class="card-icon">&#x1F50D;</div>
-        <div class="card-name">Scout <span class="card-tag">New</span></div>
-        <div class="card-desc">AI-powered SDR agent. Finds leads, scores them against your ICP, runs personalized outreach — powered by Claude.</div>
-        <div class="card-domain"><span>scout.pblvrt.com</span><div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div></div>
-      </a>
-
-      <a href="https://spinmoji.gg" target="_blank" class="card card-tall card-spinmoji fade-in d2">
-        <div class="card-icon">&#x1F3B0;</div>
-        <div class="card-name">Spinmoji</div>
-        <div class="card-desc">Roguelike deckbuilding slot machine game. Emoji-powered chaos.</div>
-        <div class="card-domain"><span>spinmoji.gg</span><div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div></div>
-      </a>
-
-      <a href="https://streameth.org" target="_blank" class="card card-streameth fade-in d3">
-        <div class="card-icon">&#x1F4F9;</div>
-        <div class="card-name">StreamETH</div>
-        <div class="card-desc">Livestreaming and video infrastructure for Ethereum events.</div>
-        <div class="card-domain"><span>streameth.org</span><div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div></div>
-      </a>
-
-      <a href="https://oneshotapp.io" target="_blank" class="card card-oneshot fade-in d4">
-        <div class="card-icon">&#x26A1;</div>
-        <div class="card-name">Oneshot</div>
-        <div class="card-desc">Build and deploy web apps through AI conversation.</div>
-        <div class="card-domain"><span>oneshotapp.io</span><div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div></div>
-      </a>
-
-      <a href="https://usecaselab.org" target="_blank" class="card card-ucl fade-in d5">
-        <div class="card-icon">&#x1F9EA;</div>
-        <div class="card-name">Use Case Lab</div>
-        <div class="card-desc">122 Ethereum use case ideas across 16 domains.</div>
-        <div class="card-domain"><span>usecaselab.org</span><div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div></div>
-      </a>
-
-      <a href="https://vibecourse.io" target="_blank" class="card card-vibecourse fade-in d6">
-        <div class="card-icon">&#x1F3B5;</div>
-        <div class="card-name">Vibecourse</div>
-        <div class="card-desc">AI-powered course creation platform.</div>
-        <div class="card-domain"><span>vibecourse.io</span><div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div></div>
-      </a>
-
-      <a href="https://app.recall.pblvrt.com" target="_blank" class="card card-recall fade-in d7">
-        <div class="card-icon">&#x1F4DD;</div>
-        <div class="card-name">Recall</div>
-        <div class="card-desc">AI-powered meeting recall and notes.</div>
-        <div class="card-domain"><span>app.recall.pblvrt.com</span><div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div></div>
-      </a>
-
-      <a href="https://explorer.usecaselab.org" target="_blank" class="card card-ucl fade-in d8">
-        <div class="card-icon">&#x1F310;</div>
-        <div class="card-name">UCL Explorer</div>
-        <div class="card-desc">Interactive explorer for Ethereum use cases across domains.</div>
-        <div class="card-domain"><span>explorer.usecaselab.org</span><div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div></div>
-      </a>
-
-      <a href="https://app.x402.pblvrt.com" target="_blank" class="card card-x402 fade-in d9">
-        <div class="card-icon">&#x1F4B0;</div>
-        <div class="card-name">x402</div>
-        <div class="card-desc">Experimental x402 payment protocol implementation.</div>
-        <div class="card-domain"><span>app.x402.pblvrt.com</span><div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div></div>
-      </a>
-
-    </div>
-
-    <footer class="fade-in d9">
-      <span>pblvrt.com</span>
-      <div class="status">
-        <div class="status-dot"></div>
-        All systems on one VPS
+    <article class="case">
+      <div class="body">
+        <div class="tagrow"><span class="tag c">Platform</span><span class="tag">Open source</span><span class="tag">Founder</span></div>
+        <h3>StreamETH</h3>
+        <div class="role">Founder · 2021–2025</div>
+        <dl>
+          <dt>Problem</dt><dd>Web3 events produce great talks, but most recordings never get edited, published or found again.</dd>
+          <dt>What I built</dt><dd>An <b>open-source video platform for web3 events</b>: livestreaming, recording and automated pipelines that turn live sessions into searchable, publishable content.</dd>
+          <dt>Outcome</dt><dd>Used to stream and archive Ethereum community events. Product, architecture and team were all mine to run.</dd>
+        </dl>
+        <a class="link" href="https://streameth.org" target="_blank" rel="noopener">streameth.org ↗</a>
       </div>
-    </footer>
+      <div class="diagram">
+        <div class="lbl">Architecture</div>
+        <div class="flow">
+          <div class="row two"><div class="node">Venue streams</div><div class="node">Remote speakers</div></div><div class="arrow"></div>
+          <div class="node hl">Ingest &amp; live transcode</div><div class="arrow"></div>
+          <div class="row"><div class="node">Live player</div><div class="node">VOD archive</div><div class="node">Clips</div></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="body">
+        <div class="tagrow"><span class="tag c">AI agents</span><span class="tag">Claude</span><span class="tag">Multi-tenant</span></div>
+        <h3>Scout: an AI sales development agent</h3>
+        <div class="role">Founder · 2026–present</div>
+        <dl>
+          <dt>Problem</dt><dd>Prospecting on LinkedIn is slow, repetitive work, and generic outreach automation gets ignored and gets accounts banned.</dd>
+          <dt>What I built</dt><dd>A signal-based lead engine: <b>Claude agents find prospects that match an ICP, score them against qualification signals and draft personalised outreach</b>, with a human approving every step. It ships as a containerised stack (app, headless-browser sidecar, edge proxy) deployed per tenant, plus a licensing, telemetry and update server.</dd>
+          <dt>Outcome</dt><dd>Running in production for clients, each on its own isolated instance.</dd>
+        </dl>
+        <a class="link" href="https://scout.pblvrt.com" target="_blank" rel="noopener">scout.pblvrt.com ↗</a>
+      </div>
+      <div class="diagram">
+        <div class="lbl">Per-tenant deployment</div>
+        <div class="flow">
+          <div class="node">ICP &amp; signals <small>defined with the client</small></div><div class="arrow"></div>
+          <div class="node hl">Claude agents <small>discover → score → draft</small></div><div class="arrow"></div>
+          <div class="node">Human approval queue</div><div class="arrow"></div>
+          <div class="row"><div class="node">App</div><div class="node">Chrome sidecar</div><div class="node">Caddy edge</div></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="body">
+        <div class="tagrow"><span class="tag c">Agent orchestration</span><span class="tag">MCP</span><span class="tag">Open source</span></div>
+        <h3>Helix: goal-driven coordination for Claude agents</h3>
+        <div class="role">Creator · open source (MIT)</div>
+        <dl>
+          <dt>Problem</dt><dd>Single agents are good at tasks but bad at long-running goals: they lose context, use the wrong tools and nobody checks their work.</dd>
+          <dt>What I built</dt><dd>A desktop engine that turns a goal into a <b>kanban board of tasks</b>. A planner agent breaks the goal down, each task runs as a Claude subprocess with only the <b>MCP tools scoped to that goal</b>, and every result is verified before the next task is chained on.</dd>
+          <dt>Outcome</dt><dd>A reusable pattern for putting agents to work safely: scoped tools, human approval and verification by default.</dd>
+        </dl>
+        <a class="link" href="https://github.com/pblvrt/helix" target="_blank" rel="noopener">github.com/pblvrt/helix ↗</a>
+      </div>
+      <div class="diagram">
+        <div class="lbl">Control loop</div>
+        <div class="flow">
+          <div class="node">Goal <small>intent + linked MCP servers</small></div><div class="arrow"></div>
+          <div class="node hl">Planner agent → board</div><div class="arrow"></div>
+          <div class="row"><div class="node">Backlog</div><div class="node">In progress</div><div class="node">Verify</div></div><div class="arrow"></div>
+          <div class="node">Approve · chain next task</div>
+        </div>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="body">
+        <div class="tagrow"><span class="tag c">Fintech</span><span class="tag">Compliance</span><span class="tag">Hexagonal architecture</span></div>
+        <h3>Accountify: automated accounting &amp; tax</h3>
+        <div class="role">Architect &amp; builder</div>
+        <dl>
+          <dt>Problem</dt><dd>Running a small company in Portugal means double-entry books, VAT, corporate tax and certified invoicing: a lot of rules, and costly mistakes.</dd>
+          <dt>What I built</dt><dd>A <b>modular monolith with ports &amp; adapters</b>: a real double-entry ledger (Blnk) with a single writer that enforces balance, idempotency and period locks, and a compliance layer for SNC, IVA/IRC, SAF-T and certified invoices. Decimal money and typed, validated boundaries throughout.</dd>
+          <dt>Outcome</dt><dd>Bookkeeping and filings that are correct by construction, not by careful data entry.</dd>
+        </dl>
+        <a class="link" href="https://github.com/pblvrt/accountify" target="_blank" rel="noopener">github.com/pblvrt/accountify ↗</a>
+      </div>
+      <div class="diagram">
+        <div class="lbl">Modules</div>
+        <div class="flow">
+          <div class="row two"><div class="node">Bank feed</div><div class="node">Invoices</div></div><div class="arrow"></div>
+          <div class="node hl">LedgerService.post <small>balance · idempotency · period lock</small></div><div class="arrow"></div>
+          <div class="node">Blnk double-entry ledger</div><div class="arrow"></div>
+          <div class="row"><div class="node">SAF-T</div><div class="node">IVA / IRC</div><div class="node">IES</div></div>
+        </div>
+      </div>
+    </article>
 
   </div>
+</div></section>
+
+<section id="experience"><div class="wrap">
+  <div class="eyebrow">Experience</div>
+  <h2>Where I've done it</h2>
+  <div class="xp">
+    <div class="xp-item"><div class="when">2022 – now</div><div><h3>Ethereum Foundation <span>· Senior Solutions Architect</span></h3><p>Led video production engineering for five Devcon and Devconnect editions (2022–2026). Since 2026, in the Usecase Lab, exploring and prototyping new applications of Ethereum.</p></div></div>
+    <div class="xp-item"><div class="when">2026 – now</div><div><h3>Scout <span>· Founder</span></h3><p>Claude-powered sales development agent, deployed per client.</p></div></div>
+    <div class="xp-item"><div class="when">2021 – 2025</div><div><h3>StreamETH <span>· Founder</span></h3><p>Open-source video platform for web3 events: live streaming, archive and automated content pipelines.</p></div></div>
+    <div class="xp-item"><div class="when">2023</div><div><h3>Beem <span>· CTO</span></h3><p>Built the paid-access stack: paywalls, subscriptions, billing integrations and revenue reporting.</p></div></div>
+    <div class="xp-item"><div class="when">2021 – 2022</div><div><h3>Sunhero <span>· First engineering hire</span></h3><p>Built the solar quoting tool that later received an EU patent.</p></div></div>
+    <div class="xp-item"><div class="when">Earlier</div><div><h3>Independent <span>· AWS Solutions Architect &amp; Engineer</span></h3><p>Ran client projects end to end, from discovery and architecture to delivery and handover.</p></div></div>
+  </div>
+</div></section>
+
+<section id="stack"><div class="wrap">
+  <div class="eyebrow">Toolbox</div>
+  <h2>What I build with</h2>
+  <div class="stack">
+    <div><h4>AI &amp; agents</h4><ul><li>Claude / Agent SDK</li><li>MCP</li><li>Multi-agent orchestration</li><li>Human-in-the-loop</li><li>OpenAI / OpenRouter</li></ul></div>
+    <div><h4>Application</h4><ul><li>TypeScript</li><li>Node.js</li><li>Next.js / React</li><li>Electron</li><li>Python</li><li>Zod</li></ul></div>
+    <div><h4>Cloud &amp; ops</h4><ul><li>AWS</li><li>Docker</li><li>Self-hosted PaaS</li><li>Postgres / Supabase</li><li>Redis</li><li>Caddy / nginx</li></ul></div>
+    <div><h4>Video &amp; web3</h4><ul><li>Live streaming</li><li>Transcoding &amp; VOD</li><li>Ethereum</li><li>Solidity</li><li>ERC-8004 agents</li></ul></div>
+  </div>
+</div></section>
+
+<section id="more"><div class="wrap">
+  <div class="eyebrow">Also shipped</div>
+  <h2>More projects</h2>
+  <div class="more">
+    <a class="mini" href="https://oneshotapp.io" target="_blank" rel="noopener"><h4>Oneshot <span>↗</span></h4><p>Build and deploy web apps through an AI conversation.</p><code>oneshotapp.io</code></a>
+    <a class="mini" href="https://usecaselab.org" target="_blank" rel="noopener"><h4>Use Case Lab <span>↗</span></h4><p>122 Ethereum use-case ideas across 16 domains, with an interactive explorer.</p><code>usecaselab.org</code></a>
+    <a class="mini" href="https://vibecourse.io" target="_blank" rel="noopener"><h4>Vibecourse <span>↗</span></h4><p>AI-powered course creation platform.</p><code>vibecourse.io</code></a>
+    <a class="mini" href="https://app.recall.pblvrt.com" target="_blank" rel="noopener"><h4>Recall <span>↗</span></h4><p>AI meeting recall and notes.</p><code>app.recall.pblvrt.com</code></a>
+    <a class="mini" href="https://mesopotamia.pblvrt.com" target="_blank" rel="noopener"><h4>Mesopotamia 3D <span>↗</span></h4><p>Interactive 3D map of Mesopotamia in Hammurabi's time, with cities at true scale.</p><code>mesopotamia.pblvrt.com</code></a>
+    <a class="mini" href="https://github.com/pblvrt" target="_blank" rel="noopener"><h4>Venue 3D <span>↗</span></h4><p>Three.js digital twins of event venues, with walk-through and path-traced renders, used to plan Devcon.</p><code>github.com/pblvrt</code></a>
+  </div>
+</div></section>
+
+<section class="contact" id="contact"><div class="wrap">
+  <div class="eyebrow">Contact</div>
+  <h2>Have a workflow that should run itself?</h2>
+  <p class="sub">I'm looking for AI Solutions Architect and forward-deployed roles, remote in Europe. Happy to talk about a role or a problem you're stuck on.</p>
+  <div class="cta">
+    <a class="btn primary" href="https://x.com/pblvrt" target="_blank" rel="noopener">Message me on X</a>
+    <a class="btn" href="https://github.com/pblvrt" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</div></section>
+
+<footer><div class="wrap"><span>© 2026 pblvrt</span><span>Self-hosted on one VPS · built with AI agents</span></div></footer>
 </body>
 </html>

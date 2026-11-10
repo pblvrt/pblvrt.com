@@ -24,7 +24,7 @@ Rules:
 ${profile}
 </profile>`;
 
-const EL_KEY = process.env.ELEVENLABS_API_KEY, EL_VOICE = process.env.ELEVENLABS_VOICE_ID, EL_MODEL = process.env.ELEVENLABS_MODEL || 'eleven_v4';
+const EL_KEY = process.env.ELEVENLABS_API_KEY, EL_VOICE = process.env.ELEVENLABS_VOICE_ID, EL_MODEL = process.env.ELEVENLABS_MODEL || 'eleven_flash_v2_5';
 const eleven = EL_KEY ? new ElevenLabsClient() : null; // reads ELEVENLABS_API_KEY
 let ttsDay = '', ttsChars = 0; const TTS_DAILY_CHARS = Number(process.env.TTS_DAILY_CHARS || 60000);
 async function tts(req, res) {

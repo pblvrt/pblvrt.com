@@ -52,7 +52,7 @@ class LipSync {
   target() {
     const tr = this.track; if (!tr) return null;
     let t;
-    if (tr.kind === 'audio') { if (tr.audio.paused || tr.audio.ended) return null; t = tr.audio.currentTime; }
+    if (tr.kind === 'audio') { if (tr.audio.paused || tr.audio.ended) return null; t = tr.audio.currentTime + 0.07; } // lips lead the sound slightly
     else { if (!tr.on) return null; t = (performance.now() - tr.start) / 1000; }
     let v = REST, amp = 1;
     if (tr.tl) {

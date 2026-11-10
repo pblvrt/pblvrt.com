@@ -1,6 +1,7 @@
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { join, extname, normalize } from 'node:path';
+import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 
 const PORT = process.env.PORT || 80;
 const OR_KEY = process.env.OPENROUTER_API_KEY;
@@ -23,7 +24,8 @@ Rules:
 ${profile}
 </profile>`;
 
-const EL_KEY = process.env.ELEVENLABS_API_KEY, EL_VOICE = process.env.ELEVENLABS_VOICE_ID;
+const EL_KEY = process.env.ELEVENLABS_API_KEY, EL_VOICE = process.env.ELEVENLABS_VOICE_ID, EL_MODEL = process.env.ELEVENLABS_MODEL || 'eleven_v4';
+const eleven = EL_KEY ? new ElevenLabsClient() : null; // reads ELEVENLABS_API_KEY
 let ttsDay = '', ttsChars = 0; const TTS_DAILY_CHARS = Number(process.env.TTS_DAILY_CHARS || 60000);
 async function tts(req, res) {
   if (!EL_KEY || !EL_VOICE) return res.writeHead(404).end();
@@ -32,15 +34,14 @@ async function tts(req, res) {
   const today = new Date().toISOString().slice(0, 10); if (today !== ttsDay) { ttsDay = today; ttsChars = 0; }
   if (!text || ttsChars + text.length > TTS_DAILY_CHARS) return res.writeHead(429).end();
   ttsChars += text.length;
-  const up = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${EL_VOICE}/with-timestamps?output_format=mp3_44100_64`, {
-    method: 'POST', headers: { 'xi-api-key': EL_KEY, 'content-type': 'application/json' },
-    body: JSON.stringify({ text, model_id: process.env.ELEVENLABS_MODEL || 'eleven_flash_v2_5' }),
-  }).catch(() => null);
-  if (!up || !up.ok) { console.error('tts', up && up.status); return res.writeHead(502).end(); }
-  // audio plus per-character timings, which drive the avatar's mouth
-  const j = await up.json();
+  // Pablo's cloned voice; audio plus per-character timings, which drive the avatar's mouth
+  const opts = model => ({ text, modelId: model, outputFormat: 'mp3_44100_64', voiceSettings: { stability: 0.5, similarityBoost: 0.8 } });
+  let j = await eleven.textToSpeech.convertWithTimestamps(EL_VOICE, opts(EL_MODEL)).catch(e => { console.error('tts', EL_MODEL, e.statusCode || e.message); return null; });
+  if (!j && EL_MODEL !== 'eleven_multilingual_v2') j = await eleven.textToSpeech.convertWithTimestamps(EL_VOICE, opts('eleven_multilingual_v2')).catch(e => { console.error('tts', e.statusCode || e.message); return null; });
+  if (!j) return res.writeHead(502).end();
+  const a = j.alignment || j.normalizedAlignment;
   res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
-  res.end(JSON.stringify({ audio: j.audio_base64, alignment: j.alignment || j.normalized_alignment || null }));
+  res.end(JSON.stringify({ audio: j.audioBase64, alignment: a ? { characters: a.characters, character_start_times_seconds: a.characterStartTimesSeconds, character_end_times_seconds: a.characterEndTimesSeconds } : null }));
 }
 
 const hits = new Map(); let day = '', dayCount = 0;

@@ -1,0 +1,11 @@
+{
+  "name": "pblvrt.com",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env.local server.mjs"
+  },
+  "dependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.77.0"
+  }
+}

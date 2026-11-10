@@ -104,8 +104,17 @@ class Avatar {
     return out.map((v, t) => { const a = out[Math.max(0, t - 1)], b = out[Math.min(T - 1, t + 1)]; return [(a[0] + 2 * v[0] + b[0]) / 4, (a[1] + 2 * v[1] + b[1]) / 4]; });
   }
 
+  // play the real talking footage straight through (forward, bouncing back at cuts)
+  // instead of hopping between frames: real motion reads as natural even off-sync
   speak(tl, dur, clock) {
-    const path = this.plan(this.targets(tl, dur), this.cur, false);
+    const T = Math.ceil(dur * FPS) + 3, path = new Int32Array(T), ok = i => i >= 0 && this.has[i];
+    let f = Math.floor(Math.random() * this.N), d = 1; while (!ok(f)) f = (f + 1) % this.N;
+    for (let t = 0; t < T; t++) {
+      path[t] = f;
+      let g = d > 0 ? this.next[f] : (f > 0 && this.next[f - 1] === f ? f - 1 : -1);
+      if (!ok(g)) { d = -d; g = d > 0 ? this.next[f] : (f > 0 && this.next[f - 1] === f ? f - 1 : -1); }
+      if (ok(g)) f = g;
+    }
     this.track = { path, clock }; this.idle = null;
   }
 

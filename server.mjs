@@ -23,6 +23,24 @@ Rules:
 ${profile}
 </profile>`;
 
+const EL_KEY = process.env.ELEVENLABS_API_KEY, EL_VOICE = process.env.ELEVENLABS_VOICE_ID;
+let ttsDay = '', ttsChars = 0; const TTS_DAILY_CHARS = Number(process.env.TTS_DAILY_CHARS || 60000);
+async function tts(req, res) {
+  if (!EL_KEY || !EL_VOICE) return res.writeHead(404).end();
+  let body = ''; for await (const c of req) { body += c; if (body.length > 8000) return res.writeHead(413).end(); }
+  let text; try { text = String(JSON.parse(body).text || '').slice(0, 1500); } catch { return res.writeHead(400).end(); }
+  const today = new Date().toISOString().slice(0, 10); if (today !== ttsDay) { ttsDay = today; ttsChars = 0; }
+  if (!text || ttsChars + text.length > TTS_DAILY_CHARS) return res.writeHead(429).end();
+  ttsChars += text.length;
+  const up = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${EL_VOICE}?output_format=mp3_44100_64`, {
+    method: 'POST', headers: { 'xi-api-key': EL_KEY, 'content-type': 'application/json' },
+    body: JSON.stringify({ text, model_id: process.env.ELEVENLABS_MODEL || 'eleven_flash_v2_5' }),
+  }).catch(() => null);
+  if (!up || !up.ok) { console.error('tts', up && up.status); return res.writeHead(502).end(); }
+  res.writeHead(200, { 'content-type': 'audio/mpeg', 'cache-control': 'no-store' });
+  res.end(Buffer.from(await up.arrayBuffer()));
+}
+
 const hits = new Map(); let day = '', dayCount = 0;
 function allowed(ip) {
   const today = new Date().toISOString().slice(0, 10);
@@ -32,7 +50,7 @@ function allowed(ip) {
   arr.push(now); hits.set(ip, arr); dayCount++; return true;
 }
 
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.pdf': 'application/pdf', '.ico': 'image/x-icon' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.pdf': 'application/pdf', '.ico': 'image/x-icon', '.mp4': 'video/mp4', '.webm': 'video/webm', '.json': 'application/json', '.mp3': 'audio/mpeg' };
 
 async function chat(req, res) {
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
@@ -84,6 +102,7 @@ http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://x');
     if (url.pathname === '/api/chat' && req.method === 'POST') return await chat(req, res);
+    if (url.pathname === '/api/tts' && req.method === 'POST') return await tts(req, res);
     if (url.pathname === '/health') return res.end('ok');
     let p = normalize(decodeURIComponent(url.pathname)).replace(/^(\.\.[/\\])+/, '');
     if (p.endsWith('/')) p += 'index.html';

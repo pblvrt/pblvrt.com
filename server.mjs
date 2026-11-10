@@ -3,8 +3,9 @@ import { readFile } from 'node:fs/promises';
 import { join, extname, normalize } from 'node:path';
 
 const PORT = process.env.PORT || 80;
-const KEY = process.env.ANTHROPIC_API_KEY;
-const MODEL = process.env.CHAT_MODEL || 'claude-haiku-5-5';
+const OR_KEY = process.env.OPENROUTER_API_KEY;
+const KEY = OR_KEY || process.env.ANTHROPIC_API_KEY;
+const MODEL = process.env.CHAT_MODEL || (OR_KEY ? 'anthropic/claude-haiku-5.5' : 'claude-haiku-5-5');
 const DAILY_LIMIT = Number(process.env.CHAT_DAILY_LIMIT || 400); // all visitors, per day
 const PER_IP = 20; // messages per IP per hour
 const profile = await readFile(new URL('./profile.md', import.meta.url), 'utf8');
@@ -46,11 +47,17 @@ async function chat(req, res) {
   if (!KEY) return res.writeHead(503, { 'content-type': 'application/json' }).end(JSON.stringify({ error: 'The avatar is offline right now.' }));
   if (!allowed(ip)) return res.writeHead(429, { 'content-type': 'application/json' }).end(JSON.stringify({ error: "That's a lot of questions! Please reach Pablo directly on X." }));
 
-  const up = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'x-api-key': KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: MODEL, max_tokens: 500, system: SYSTEM, messages: msgs, stream: true }),
-  }).catch(() => null);
+  const up = await (OR_KEY
+    ? fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: { authorization: `Bearer ${OR_KEY}`, 'content-type': 'application/json', 'HTTP-Referer': 'https://pblvrt.com', 'X-Title': 'pblvrt.com avatar' },
+        body: JSON.stringify({ model: MODEL, max_tokens: 500, stream: true, messages: [{ role: 'system', content: SYSTEM }, ...msgs] }),
+      })
+    : fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'x-api-key': KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+        body: JSON.stringify({ model: MODEL, max_tokens: 500, system: SYSTEM, messages: msgs, stream: true }),
+      })).catch(() => null);
   if (!up || !up.ok) {
     console.error('upstream', up && up.status, up && await up.text().catch(() => ''));
     return res.writeHead(502, { 'content-type': 'application/json' }).end(JSON.stringify({ error: 'The avatar is having a moment. Try again shortly.' }));
@@ -62,8 +69,12 @@ async function chat(req, res) {
     let i;
     while ((i = buf.indexOf('\n')) >= 0) {
       const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
-      if (!line.startsWith('data:')) continue;
-      try { const ev = JSON.parse(line.slice(5)); if (ev.type === 'content_block_delta' && ev.delta?.text) res.write(ev.delta.text); } catch {}
+      if (!line.startsWith('data:') || line === 'data: [DONE]') continue;
+      try {
+        const ev = JSON.parse(line.slice(5));
+        const t = OR_KEY ? ev.choices?.[0]?.delta?.content : (ev.type === 'content_block_delta' && ev.delta?.text);
+        if (t) res.write(t);
+      } catch {}
     }
   }
   res.end();

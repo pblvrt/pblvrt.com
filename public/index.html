@@ -33,8 +33,8 @@ header{display:flex;justify-content:space-between;align-items:center;padding:18p
 .frame .hidden{opacity:0}
 .frame img{transform-origin:50% 30%}
 .frame.talking{box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 3px rgba(167,139,250,.5),0 0 70px rgba(167,139,250,.35)}
-.frame.talking img{animation:breathe 2.4s ease-in-out infinite}
-@keyframes breathe{50%{transform:scale(1.025)}}
+.frame img{animation:breathe 5s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.012)}}
 .frame.thinking{box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 3px rgba(96,165,250,.35)}
 .badge{position:absolute;left:14px;top:14px;display:flex;align-items:center;gap:8px;padding:6px 11px;border-radius:999px;background:rgba(8,8,12,.65);backdrop-filter:blur(8px);font-size:12px;font-family:var(--mono);color:var(--text-2)}
 .badge i{width:7px;height:7px;border-radius:50%;background:var(--text-3)}
@@ -134,14 +134,14 @@ fetch('/avatar/manifest.json').then(r=>r.ok?r.json():null).then(m=>{
   if(!m)return;
   if(m.still){still.src=m.still;still.onload=()=>still.classList.remove('hidden')}
   if(m.idle){idle.src=m.idle;idle.oncanplay=()=>{hasVideo=true;idle.classList.remove('hidden');idle.play().catch(()=>{})}}
-  if(m.talk)talk.src=m.talk;
+  if(m.talk){talk.src=m.talk;talk.load()}
   if(m.intro){intro.src=m.intro;play.hidden=false}
 }).catch(()=>{});
 
 function setState(st){
   frame.classList.toggle('talking',st==='talking');frame.classList.toggle('thinking',st==='thinking');
   stateEl.textContent=st==='talking'?'speaking…':st==='thinking'?'thinking…':'AI avatar';
-  if(hasVideo&&talk.src){const on=st==='talking';talk.classList.toggle('hidden',!on);if(on){talk.currentTime=0;talk.play().catch(()=>{})}else talk.pause()}
+  if(talk.getAttribute('src')){const on=st==='talking';talk.classList.toggle('hidden',!on);if(on){talk.play().catch(()=>{})}else talk.pause()}
 }
 play.onclick=()=>{play.hidden=true;intro.classList.remove('hidden');intro.muted=false;intro.currentTime=0;intro.play();setState('talking')};
 intro.onended=()=>{intro.classList.add('hidden');setState('idle')};

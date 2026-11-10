@@ -132,10 +132,24 @@ class Avatar {
   unlock() {}
   stop() { this.track = null; }
 
-  // calm "listening" footage: closed mouth, played a bit slower than real time
+  // calm "listening" face: hold a real closed-mouth frame, drift slowly to a similar one
+  // every few seconds, and blink with the most similar real blink frame
   idlePlan() {
-    const T = FPS * 8, tg = Array.from({ length: T }, () => [0.01, this.shapeW[1]]);
-    this.idle = { path: this.plan(tg, this.cur, true), t0: performance.now() };
+    const N = this.N, J = this.jumpCost(), has = this.has;
+    const calm = [], blinks = [];
+    for (let i = 0; i < N; i++) if (has[i]) { if (this.open[i] < 0.035 && this.blink[i] < 0.3) calm.push(i); else if (this.blink[i] > 0.55) blinks.push(i); }
+    if (!calm.length) calm.push(this.cur || 0);
+    const near = (from, set, n) => set.slice().sort((x, y) => J[from * N + x] - J[from * N + y]).slice(0, n);
+    let f = calm.includes(this.cur) ? this.cur : near(this.cur || 0, calm, 1)[0];
+    const path = [];
+    for (let seg = 0; seg < 3; seg++) {
+      const hold = Math.round(FPS * (2 + Math.random() * 2.5));
+      const blinkAt = blinks.length && Math.random() < 0.8 ? Math.floor(hold * (0.3 + Math.random() * 0.4)) : -1;
+      const bf = blinkAt >= 0 ? near(f, blinks, 1)[0] : -1;
+      for (let k = 0; k < hold; k++) path.push(k >= blinkAt && k < blinkAt + 4 && bf >= 0 ? bf : f);
+      const opts = near(f, calm, 8).filter(x => x !== f); if (opts.length) f = opts[Math.floor(Math.random() * opts.length)];
+    }
+    this.idle = { path: Int32Array.from(path), t0: performance.now() };
   }
 
   frame() {
@@ -149,15 +163,15 @@ class Avatar {
     }
     if (!pos) {
       if (!this.idle) this.idlePlan();
-      const f = (now - this.idle.t0) / 1000 * FPS * 0.7;
+      const f = (now - this.idle.t0) / 1000 * FPS;
       if (f >= this.idle.path.length - 1) { this.idlePlan(); return this.frame(); }
       pos = { path: this.idle.path, f };
     }
     const k = Math.floor(pos.f), a = pos.path[k], b = pos.path[Math.min(k + 1, pos.path.length - 1)], fr = pos.f - k;
     // cuts between non-consecutive frames dissolve over ~120 ms so they read as motion
-    if (this.cur != null && a !== this.cur && a !== this.next[this.cur]) { this.fadeFrom = this.cur; this.fadeAt = now; }
+    if (this.cur != null && a !== this.cur && a !== this.next[this.cur]) { this.fadeFrom = this.cur; this.fadeAt = now; this.fadeMs = pos.path !== (this.idle && this.idle.path) ? 120 : this.blink[a] > 0.5 || this.blink[this.cur] > 0.5 ? 50 : 450; }
     this.cur = a;
-    const fade = this.fadeFrom != null ? Math.min(1, (now - this.fadeAt) / 120) : 1;
+    const fade = this.fadeFrom != null ? Math.min(1, (now - this.fadeAt) / this.fadeMs) : 1;
     if (fade >= 1) this.fadeFrom = null;
     const { cx, cfg } = this, [W, H] = cfg.size;
     const s = (now - this.t0) / 1000, m = tr && tr.started ? 1.5 : 1;

@@ -29,12 +29,8 @@ header{display:flex;justify-content:space-between;align-items:center;padding:18p
 .main{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:28px;min-height:0;padding-bottom:22px}
 .stage{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;gap:18px}
 .frame{position:relative;height:min(100%,640px);max-width:100%;aspect-ratio:3/4;border-radius:28px;overflow:hidden;border:1px solid var(--line-2);background:#120f1f;box-shadow:0 30px 80px rgba(0,0,0,.5);transition:box-shadow .3s}
-.frame video,.frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .35s}
-.frame .hidden{opacity:0}
-.frame img{transform-origin:50% 30%}
+.frame canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .35s}
 .frame.talking{box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 3px rgba(167,139,250,.5),0 0 70px rgba(167,139,250,.35)}
-.frame img{animation:breathe 5s ease-in-out infinite}
-@keyframes breathe{50%{transform:scale(1.012)}}
 .frame.thinking{box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 3px rgba(96,165,250,.35)}
 .badge{position:absolute;left:14px;top:14px;display:flex;align-items:center;gap:8px;padding:6px 11px;border-radius:999px;background:rgba(8,8,12,.65);backdrop-filter:blur(8px);font-size:12px;font-family:var(--mono);color:var(--text-2)}
 .badge i{width:7px;height:7px;border-radius:50%;background:var(--text-3)}
@@ -93,13 +89,9 @@ input::placeholder{color:var(--text-3)}
   <div class="main">
     <div class="stage">
       <div class="frame" id="frame">
-        <img id="still" class="hidden" alt="Pablo">
-        <video id="idle" class="hidden" muted loop playsinline preload="auto"></video>
-        <video id="talk" class="hidden" muted loop playsinline preload="auto"></video>
-        <video id="intro" class="hidden" playsinline preload="auto"></video>
+        <canvas id="face" aria-label="Pablo's avatar"></canvas>
         <div class="badge"><i></i><span id="state">AI avatar</span></div>
         <div class="eq"><span></span><span></span><span></span><span></span></div>
-        <button class="play" id="play" type="button" hidden>▶ Say hi</button>
       </div>
       <div class="namecard"><h1>Pablo</h1><p>AI Solutions Architect · Ethereum Foundation · founder of StreamETH &amp; Scout</p></div>
       <div class="links"><a href="/work.html">Classic CV view</a><a href="https://github.com/pblvrt" target="_blank" rel="noopener">GitHub</a><a href="https://x.com/pblvrt" target="_blank" rel="noopener">X</a></div>
@@ -123,63 +115,79 @@ input::placeholder{color:var(--text-3)}
   </div>
 </div>
 
+<script src="/lipsync.js"></script>
 <script>
 (()=>{
 const $=id=>document.getElementById(id);
-const frame=$('frame'),still=$('still'),idle=$('idle'),talk=$('talk'),intro=$('intro'),play=$('play'),log=$('log'),chips=$('chips'),f=$('f'),q=$('q'),send=$('send'),vbtn=$('voice'),mic=$('mic'),stateEl=$('state');
-const history=[];let voice=true,busy=false,hasVideo=false,audio=null;
-
-// Avatar media: /avatar/still.jpg, idle.mp4 (silent loop), talk.mp4 (silent talking loop), intro.mp4 (with sound)
-fetch('/avatar/manifest.json').then(r=>r.ok?r.json():null).then(m=>{
-  if(!m)return;
-  if(m.still){still.src=m.still;still.onload=()=>still.classList.remove('hidden')}
-  if(m.idle){idle.src=m.idle;idle.oncanplay=()=>{hasVideo=true;idle.classList.remove('hidden');idle.play().catch(()=>{})}}
-  if(m.talk){talk.src=m.talk;talk.load()}
-  if(m.intro){intro.src=m.intro;play.hidden=false}
-}).catch(()=>{});
+const frame=$('frame'),log=$('log'),chips=$('chips'),f=$('f'),q=$('q'),send=$('send'),vbtn=$('voice'),mic=$('mic'),stateEl=$('state');
+const history=[];let voice=true,busy=false,audio=null;
+const av=new LipSync($('face'));av.init().catch(e=>console.error('avatar',e));
 
 function setState(st){
   frame.classList.toggle('talking',st==='talking');frame.classList.toggle('thinking',st==='thinking');
   stateEl.textContent=st==='talking'?'speaking…':st==='thinking'?'thinking…':'AI avatar';
-  if(talk.getAttribute('src')){const on=st==='talking';talk.classList.toggle('hidden',!on);if(on){talk.play().catch(()=>{})}else talk.pause()}
 }
-play.onclick=()=>{play.hidden=true;intro.classList.remove('hidden');intro.muted=false;intro.currentTime=0;intro.play();setState('talking')};
-intro.onended=()=>{intro.classList.add('hidden');setState('idle')};
-
 vbtn.onclick=()=>{voice=!voice;vbtn.classList.toggle('on',voice);vbtn.textContent=voice?'🔊 Voice on':'🔇 Voice off';if(!voice)stopSpeech()};
+
+// Speech queue: each finished sentence is voiced while the rest of the answer streams in.
 const synth=window.speechSynthesis;
-function stopSpeech(){if(audio){audio.pause();audio=null}if(synth)synth.cancel();setState('idle')}
+let queue=[],playing=false,gen=0,ttsOff=false,fetchChain=Promise.resolve(),curDone=null;
+function stopSpeech(){gen++;queue=[];if(audio){audio.pause();audio=null}if(synth)synth.cancel();av.stop();if(curDone)curDone();if(!busy)setState('idle')}
 function pickVoice(){const vs=synth.getVoices();return vs.find(v=>/en-GB/.test(v.lang)&&/Daniel|Arthur|UK English Male/i.test(v.name))||vs.find(v=>/^en/.test(v.lang)&&/Natural|Google|Daniel|Alex/i.test(v.name))||vs.find(v=>/^en/.test(v.lang))}
-async function speak(t){
-  if(!voice)return;stopSpeech();
-  try{
-    const r=await fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:t})});
-    if(r.ok){const b=await r.blob();audio=new Audio(URL.createObjectURL(b));audio.onplay=()=>setState('talking');audio.onended=audio.onerror=()=>setState('idle');await audio.play();return}
-  }catch{}
-  if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pickVoice();if(v)u.voice=v;u.rate=1.03;u.onstart=()=>setState('talking');u.onend=u.onerror=()=>setState('idle');synth.speak(u);
+async function tts(text){
+  if(ttsOff)return null;
+  try{const r=await fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text})});
+    if(r.ok)return await r.json();if(r.status===404)ttsOff=true}catch{}
+  return null;
 }
+function say(text){
+  text=text.trim();if(!voice||!text)return;
+  const p=fetchChain=fetchChain.then(()=>tts(text));
+  queue.push({text,p,g:gen});pump();
+}
+async function pump(){
+  if(playing)return;const it=queue.shift();
+  if(!it){if(!busy)setState('idle');return}
+  playing=true;const res=await it.p;
+  if(it.g===gen)await playOne(it.text,res);
+  playing=false;pump();
+}
+function playOne(text,res){return new Promise(done=>{
+  curDone=()=>{curDone=null;done()};
+  if(res&&res.audio){
+    const bin=Uint8Array.from(atob(res.audio),c=>c.charCodeAt(0));
+    const a=audio=new Audio(URL.createObjectURL(new Blob([bin],{type:'audio/mpeg'})));
+    av.playAudio(a,res.alignment);a.onplay=()=>setState('talking');a.onended=a.onerror=()=>curDone&&curDone();
+    a.play().catch(()=>curDone&&curDone());
+  }else if(synth){
+    const u=new SpeechSynthesisUtterance(text);const v=pickVoice();if(v)u.voice=v;u.rate=1.03;
+    av.playSynth(u,text);u.onstart=()=>setState('talking');u.onend=u.onerror=()=>curDone&&curDone();synth.speak(u);
+  }else curDone();
+})}
 function add(cls,t){const d=document.createElement('div');d.className='msg '+cls;d.textContent=t;log.appendChild(d);log.scrollTop=log.scrollHeight;return d}
 async function ask(text){
-  text=text.trim();if(busy||!text)return;busy=true;send.disabled=true;stopSpeech();
-  if(!intro.paused){intro.pause();intro.classList.add('hidden')}
+  text=text.trim();if(busy||!text)return;stopSpeech();av.unlock();busy=true;send.disabled=true;
   chips.style.display='none';add('me',text);history.push({role:'user',content:text});q.value='';
   const d=add('ai typing','');setState('thinking');let out='';
   try{
     const r=await fetch('/api/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({messages:history})});
     if(!r.ok){let m='Something went wrong. Try again in a moment.';try{m=(await r.json()).error||m}catch{}throw new Error(m)}
-    const rd=r.body.getReader(),dec=new TextDecoder();setState(voice?'thinking':'talking');
-    for(;;){const {done,value}=await rd.read();if(done)break;out+=dec.decode(value,{stream:true});d.textContent=out;log.scrollTop=log.scrollHeight}
+    const rd=r.body.getReader(),dec=new TextDecoder();setState(voice?'thinking':'talking');let said=0;
+    for(;;){const {done,value}=await rd.read();if(done)break;out+=dec.decode(value,{stream:true});d.textContent=out;log.scrollTop=log.scrollHeight;
+      // voice each complete sentence (at least ~40 chars) as soon as it arrives
+      const m=[...out.slice(said).matchAll(/[.!?](?=\s)/g)].filter(x=>x.index>=40).pop();
+      if(m){say(out.slice(said,said+m.index+1));said+=m.index+1}}
     d.classList.remove('typing');history.push({role:'assistant',content:out});
-    if(voice)speak(out);else setState('idle');
-  }catch(e){d.textContent=e.message;d.classList.remove('typing');d.classList.add('err');history.pop();setState('idle')}
-  finally{busy=false;send.disabled=false;q.focus()}
+    say(out.slice(said));
+  }catch(e){d.textContent=e.message;d.classList.remove('typing');d.classList.add('err');history.pop()}
+  finally{busy=false;send.disabled=false;q.focus();if(!playing&&!queue.length)setState('idle')}
 }
 f.onsubmit=e=>{e.preventDefault();ask(q.value)};
 chips.querySelectorAll('button').forEach(b=>b.onclick=()=>ask(b.textContent));
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(SR){mic.hidden=false;let rec=null;mic.onclick=()=>{
   if(rec){rec.stop();return}
-  rec=new SR();rec.lang='en-US';rec.interimResults=true;mic.classList.add('rec');stopSpeech();
+  rec=new SR();rec.lang='en-US';rec.interimResults=true;mic.classList.add('rec');stopSpeech();av.unlock();
   rec.onresult=e=>{q.value=[...e.results].map(r=>r[0].transcript).join('');if(e.results[e.results.length-1].isFinal)ask(q.value)};
   rec.onend=rec.onerror=()=>{mic.classList.remove('rec');rec=null};rec.start();
 }}

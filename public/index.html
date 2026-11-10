@@ -17,155 +17,165 @@ html,body{height:100%}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 35%,rgba(124,58,237,.18),transparent 70%),radial-gradient(ellipse 40% 40% at 70% 80%,rgba(96,165,250,.08),transparent 70%);pointer-events:none}
 a{color:inherit;text-decoration:none}
-.app{position:relative;height:100dvh;display:grid;grid-template-rows:auto 1fr auto;max-width:900px;margin:0 auto;padding:0 20px}
-header{display:flex;justify-content:space-between;align-items:center;padding:20px 0}
-.who{font-family:var(--mono);font-size:13px}.who b{color:var(--violet);font-weight:500}
+.app{position:relative;height:100dvh;display:grid;grid-template-rows:auto 1fr;max-width:1180px;margin:0 auto;padding:0 24px}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0}
+.who{font-family:var(--mono);font-size:13px;display:flex;align-items:center;gap:14px}.who b{color:var(--violet);font-weight:500}
 .top{display:flex;gap:8px;align-items:center}
 .pill{font-size:13px;color:var(--text-2);border:1px solid var(--line-2);border-radius:999px;padding:6px 13px;background:rgba(19,19,26,.6);cursor:pointer;font-family:inherit;transition:.2s}
 .pill:hover{color:var(--text);border-color:rgba(255,255,255,.3)}
 .pill.on{color:var(--green);border-color:rgba(52,211,153,.4)}
 .status{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--green)}
 .status i{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
-
-.stage{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;gap:22px;padding-bottom:10px}
-.frame{position:relative;width:min(300px,46vh);aspect-ratio:3/4;border-radius:28px;overflow:hidden;border:1px solid var(--line-2);background:radial-gradient(circle at 50% 35%,#1d1830,#0d0d14);box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 6px rgba(167,139,250,.04);flex-shrink:1;min-height:150px}
+.main{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:28px;min-height:0;padding-bottom:22px}
+.stage{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;gap:18px}
+.frame{position:relative;height:min(100%,640px);max-width:100%;aspect-ratio:3/4;border-radius:28px;overflow:hidden;border:1px solid var(--line-2);background:#120f1f;box-shadow:0 30px 80px rgba(0,0,0,.5);transition:box-shadow .3s}
 .frame video,.frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .35s}
 .frame .hidden{opacity:0}
-.frame::after{content:'';position:absolute;inset:0;border-radius:28px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);pointer-events:none}
-.frame.talking{box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 6px rgba(167,139,250,.12),0 0 60px rgba(167,139,250,.25)}
-/* placeholder orb until the real avatar video exists */
-.orb{position:absolute;left:50%;top:50%;width:58%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 35% 30%,#c4b5fd,#7c3aed 45%,#1e3a8a);box-shadow:0 0 50px rgba(167,139,250,.4);display:grid;place-items:center}
-.orb .eyes{display:flex;gap:26%;width:100%;justify-content:center;margin-top:-8%}
-.orb .eyes i{width:9%;aspect-ratio:.7;border-radius:6px;background:#fff;animation:blink 4.5s infinite}
-.orb .mouth{position:absolute;bottom:28%;left:50%;width:20%;height:5%;transform:translateX(-50%);border-radius:0 0 14px 14px;background:rgba(255,255,255,.85)}
-.frame.talking .orb{animation:pulse 1.1s ease-in-out infinite}.frame.talking .orb .mouth{animation:talk .26s ease-in-out infinite alternate}
-.frame.thinking .orb{animation:spin 2.2s linear infinite;background:conic-gradient(#7c3aed,#60a5fa,#a78bfa,#7c3aed)}
-@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
-@keyframes pulse{50%{transform:translate(-50%,-50%) scale(1.05)}}
-@keyframes talk{to{height:11%}}
-@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.frame img{transform-origin:50% 30%}
+.frame.talking{box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 3px rgba(167,139,250,.5),0 0 70px rgba(167,139,250,.35)}
+.frame.talking img{animation:breathe 2.4s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.025)}}
+.frame.thinking{box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 3px rgba(96,165,250,.35)}
+.badge{position:absolute;left:14px;top:14px;display:flex;align-items:center;gap:8px;padding:6px 11px;border-radius:999px;background:rgba(8,8,12,.65);backdrop-filter:blur(8px);font-size:12px;font-family:var(--mono);color:var(--text-2)}
+.badge i{width:7px;height:7px;border-radius:50%;background:var(--text-3)}
+.frame.talking .badge i{background:var(--violet);box-shadow:0 0 8px var(--violet);animation:pulse2 .8s infinite}
+.frame.thinking .badge i{background:var(--blue);animation:pulse2 .5s infinite}
+.eq{position:absolute;right:16px;top:16px;display:flex;gap:3px;align-items:flex-end;height:18px;opacity:0;transition:.3s}
+.eq span{width:3px;background:var(--violet);border-radius:2px;animation:eq .9s ease-in-out infinite}
+.eq span:nth-child(2){animation-delay:-.3s}.eq span:nth-child(3){animation-delay:-.6s}.eq span:nth-child(4){animation-delay:-.15s}
+.frame.talking .eq{opacity:1}
+@keyframes eq{0%,100%{height:4px}50%{height:18px}}
+@keyframes pulse2{50%{opacity:.4}}
 .play{position:absolute;inset:auto 12px 12px 12px;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:14px;background:rgba(8,8,12,.7);backdrop-filter:blur(8px);border:1px solid var(--line-2);font-size:14px;font-weight:500;cursor:pointer;color:var(--text);font-family:inherit}
-.intro h1{font-size:clamp(24px,3.6vw,34px);letter-spacing:-.03em;font-weight:700;text-align:center;line-height:1.15}
-.intro h1 span{background:linear-gradient(120deg,var(--violet),var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent}
-.intro p{color:var(--text-2);text-align:center;margin-top:8px;font-size:15px}
-.say{width:100%;max-width:680px;min-height:0;max-height:26vh;overflow-y:auto;text-align:center;font-size:clamp(16px,2vw,19px);line-height:1.55;color:var(--text);white-space:pre-wrap;scrollbar-width:thin}
-.say .q{display:block;font-size:13px;color:var(--text-3);font-family:var(--mono);margin-bottom:8px}
-.say.err{color:#fca5a5}
+.namecard{text-align:center}
+.namecard h1{font-size:22px;letter-spacing:-.02em;font-weight:700}
+.namecard p{color:var(--text-2);font-size:14px;margin-top:2px}
 
-.dock{padding:8px 0 max(18px,env(safe-area-inset-bottom))}
-.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:12px}
-.chips button{font-family:inherit;font-size:13px;color:var(--text-2);background:rgba(19,19,26,.7);border:1px solid var(--line-2);border-radius:999px;padding:8px 14px;cursor:pointer;transition:.2s}
+.chat{display:flex;flex-direction:column;min-height:0;background:rgba(19,19,26,.75);backdrop-filter:blur(10px);border:1px solid var(--line-2);border-radius:24px;overflow:hidden}
+.chat-head{padding:16px 20px;border-bottom:1px solid var(--line);font-size:14px;color:var(--text-2);display:flex;justify-content:space-between;align-items:center}
+.chat-head b{color:var(--text);font-weight:600}
+.log{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin}
+.msg{max-width:88%;padding:11px 15px;border-radius:16px;font-size:15px;line-height:1.55;white-space:pre-wrap}
+.msg.ai{background:#1c1c26;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:5px}
+.msg.me{background:var(--text);color:#08080c;align-self:flex-end;border-bottom-right-radius:5px}
+.msg.err{color:#fca5a5}
+.msg.typing::after{content:'▍';color:var(--violet);animation:pulse2 .8s infinite;margin-left:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 12px}
+.chips button{font-family:inherit;font-size:13px;color:var(--text-2);background:var(--bg);border:1px solid var(--line-2);border-radius:999px;padding:7px 13px;cursor:pointer;transition:.2s;text-align:left}
 .chips button:hover{color:var(--text);border-color:rgba(255,255,255,.3)}
-form{display:flex;gap:8px;background:rgba(19,19,26,.85);backdrop-filter:blur(10px);border:1px solid var(--line-2);border-radius:16px;padding:7px}
+form{display:flex;gap:8px;margin:0 14px 14px;background:var(--bg);border:1px solid var(--line-2);border-radius:14px;padding:6px}
 form:focus-within{border-color:rgba(167,139,250,.55)}
-input{flex:1;background:none;border:0;outline:0;color:var(--text);font:inherit;font-size:16px;padding:10px 12px;min-width:0}
+input{flex:1;background:none;border:0;outline:0;color:var(--text);font:inherit;font-size:16px;padding:9px 10px;min-width:0}
 input::placeholder{color:var(--text-3)}
-.mic,.send{border:0;border-radius:11px;cursor:pointer;font:inherit;display:grid;place-items:center}
-.mic{width:44px;background:none;color:var(--text-2)}.mic:hover{color:var(--text)}.mic.rec{color:#f87171;animation:pulse2 1s infinite}
-@keyframes pulse2{50%{opacity:.5}}
+.mic,.send{border:0;border-radius:10px;cursor:pointer;font:inherit;display:grid;place-items:center}
+.mic{width:42px;background:none;color:var(--text-2)}.mic:hover{color:var(--text)}.mic.rec{color:#f87171;animation:pulse2 1s infinite}
 .mic svg{width:20px;height:20px}
 .send{background:var(--text);color:#08080c;padding:0 18px;font-weight:600}
 .send:disabled{opacity:.35;cursor:default}
-.links{display:flex;justify-content:center;gap:18px;margin-top:12px;font-size:12px;color:var(--text-3);font-family:var(--mono)}
+.links{display:flex;justify-content:center;gap:18px;font-size:12px;color:var(--text-3);font-family:var(--mono)}
 .links a:hover{color:var(--text)}
-@media (max-width:560px){.status{display:none}.chips button:nth-child(n+3){display:none}.frame{width:min(220px,36vh);border-radius:22px}}
+@media (max-width:860px){
+  body{overflow:auto}.app{height:auto;min-height:100dvh}
+  .main{grid-template-columns:1fr;gap:16px}
+  .frame{height:auto;width:min(260px,60vw)}
+  .chat{height:70dvh}
+  .status{display:none}
+}
 </style>
 </head>
 <body>
 <div class="app">
   <header>
-    <div class="who">pblvrt<b>.</b> &nbsp;<span class="status"><i></i>open to AI Solutions Architect roles</span></div>
-    <div class="top"><button class="pill on" id="voice" type="button">🔊 Voice</button></div>
+    <div class="who"><span>pblvrt<b>.</b></span><span class="status"><i></i>open to AI Solutions Architect roles · remote, Europe</span></div>
+    <div class="top"><button class="pill on" id="voice" type="button">🔊 Voice on</button></div>
   </header>
 
-  <main class="stage">
-    <div class="frame" id="frame">
-      <div class="orb" id="orb"><div class="eyes"><i></i><i></i></div><div class="mouth"></div></div>
-      <img id="still" class="hidden" alt="Pablo">
-      <video id="idle" class="hidden" muted loop playsinline preload="auto"></video>
-      <video id="talk" class="hidden" muted loop playsinline preload="auto"></video>
-      <video id="intro" class="hidden" playsinline preload="auto"></video>
-      <button class="play" id="play" type="button" hidden>▶ Say hi</button>
+  <div class="main">
+    <div class="stage">
+      <div class="frame" id="frame">
+        <img id="still" class="hidden" alt="Pablo">
+        <video id="idle" class="hidden" muted loop playsinline preload="auto"></video>
+        <video id="talk" class="hidden" muted loop playsinline preload="auto"></video>
+        <video id="intro" class="hidden" playsinline preload="auto"></video>
+        <div class="badge"><i></i><span id="state">AI avatar</span></div>
+        <div class="eq"><span></span><span></span><span></span><span></span></div>
+        <button class="play" id="play" type="button" hidden>▶ Say hi</button>
+      </div>
+      <div class="namecard"><h1>Pablo</h1><p>AI Solutions Architect · Ethereum Foundation · founder of StreamETH &amp; Scout</p></div>
+      <div class="links"><a href="/work.html">Classic CV view</a><a href="https://github.com/pblvrt" target="_blank" rel="noopener">GitHub</a><a href="https://x.com/pblvrt" target="_blank" rel="noopener">X</a></div>
     </div>
-    <div class="intro" id="intro-text">
-      <h1>Hi, I'm Pablo's <span>AI avatar</span>.</h1>
-      <p>Ask me anything about his work, the way you'd ask in an interview.</p>
-    </div>
-    <div class="say" id="say" hidden></div>
-  </main>
 
-  <div class="dock">
-    <div class="chips" id="chips">
-      <button>Why is Pablo a fit for an AI Solutions Architect role?</button>
-      <button>What did he do at the Ethereum Foundation?</button>
-      <button>How does Scout work?</button>
-      <button>How does he approach a new client problem?</button>
-    </div>
-    <form id="f">
-      <button class="mic" id="mic" type="button" title="Ask out loud" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
-      <input id="q" maxlength="1000" placeholder="Ask about Pablo's experience, projects, how he works…" autocomplete="off">
-      <button class="send" id="send">Ask</button>
-    </form>
-    <div class="links"><a href="/work.html">Classic CV view</a><a href="https://github.com/pblvrt" target="_blank" rel="noopener">GitHub</a><a href="https://x.com/pblvrt" target="_blank" rel="noopener">X</a></div>
+    <section class="chat">
+      <div class="chat-head"><span><b>Interview my AI avatar</b></span><span>answers from Pablo's real work</span></div>
+      <div class="log" id="log"><div class="msg ai">Hi, I'm Pablo's AI avatar. Ask me anything about his work, the way you would in an interview. I'll answer out loud and write it here too.</div></div>
+      <div class="chips" id="chips">
+        <button>Why is Pablo a fit for an AI Solutions Architect role?</button>
+        <button>What did he do at the Ethereum Foundation?</button>
+        <button>How does Scout work?</button>
+        <button>How does he approach a new client problem?</button>
+      </div>
+      <form id="f">
+        <button class="mic" id="mic" type="button" title="Ask out loud" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+        <input id="q" maxlength="1000" placeholder="Ask about Pablo's experience, projects, how he works…" autocomplete="off">
+        <button class="send" id="send">Ask</button>
+      </form>
+    </section>
   </div>
 </div>
 
 <script>
 (()=>{
 const $=id=>document.getElementById(id);
-const frame=$('frame'),orb=$('orb'),still=$('still'),idle=$('idle'),talk=$('talk'),intro=$('intro'),play=$('play'),say=$('say'),introText=$('intro-text'),chips=$('chips'),f=$('f'),q=$('q'),send=$('send'),vbtn=$('voice'),mic=$('mic');
+const frame=$('frame'),still=$('still'),idle=$('idle'),talk=$('talk'),intro=$('intro'),play=$('play'),log=$('log'),chips=$('chips'),f=$('f'),q=$('q'),send=$('send'),vbtn=$('voice'),mic=$('mic'),stateEl=$('state');
 const history=[];let voice=true,busy=false,hasVideo=false,audio=null;
 
-// Real avatar media, if present: /avatar/still.jpg, idle.mp4 (silent loop), talk.mp4 (silent talking loop), intro.mp4 (with sound)
+// Avatar media: /avatar/still.jpg, idle.mp4 (silent loop), talk.mp4 (silent talking loop), intro.mp4 (with sound)
 fetch('/avatar/manifest.json').then(r=>r.ok?r.json():null).then(m=>{
   if(!m)return;
-  if(m.still){still.src=m.still;still.onload=()=>{still.classList.remove('hidden');orb.style.display='none'}}
-  if(m.idle){idle.src=m.idle;idle.oncanplay=()=>{hasVideo=true;idle.classList.remove('hidden');orb.style.display='none';idle.play().catch(()=>{})}}
+  if(m.still){still.src=m.still;still.onload=()=>still.classList.remove('hidden')}
+  if(m.idle){idle.src=m.idle;idle.oncanplay=()=>{hasVideo=true;idle.classList.remove('hidden');idle.play().catch(()=>{})}}
   if(m.talk)talk.src=m.talk;
   if(m.intro){intro.src=m.intro;play.hidden=false}
 }).catch(()=>{});
 
-function setTalking(on){
-  frame.classList.toggle('talking',on);
-  if(hasVideo&&talk.src){talk.classList.toggle('hidden',!on);if(on){talk.currentTime=0;talk.play().catch(()=>{})}else talk.pause()}
+function setState(st){
+  frame.classList.toggle('talking',st==='talking');frame.classList.toggle('thinking',st==='thinking');
+  stateEl.textContent=st==='talking'?'speaking…':st==='thinking'?'thinking…':'AI avatar';
+  if(hasVideo&&talk.src){const on=st==='talking';talk.classList.toggle('hidden',!on);if(on){talk.currentTime=0;talk.play().catch(()=>{})}else talk.pause()}
 }
-play.onclick=()=>{play.hidden=true;intro.classList.remove('hidden');intro.muted=false;intro.currentTime=0;intro.play();frame.classList.add('talking')};
-intro.onended=()=>{intro.classList.add('hidden');frame.classList.remove('talking')};
+play.onclick=()=>{play.hidden=true;intro.classList.remove('hidden');intro.muted=false;intro.currentTime=0;intro.play();setState('talking')};
+intro.onended=()=>{intro.classList.add('hidden');setState('idle')};
 
-vbtn.onclick=()=>{voice=!voice;vbtn.classList.toggle('on',voice);vbtn.textContent=voice?'🔊 Voice':'🔇 Muted';if(!voice)stopSpeech()};
+vbtn.onclick=()=>{voice=!voice;vbtn.classList.toggle('on',voice);vbtn.textContent=voice?'🔊 Voice on':'🔇 Voice off';if(!voice)stopSpeech()};
 const synth=window.speechSynthesis;
-function stopSpeech(){if(audio){audio.pause();audio=null}if(synth)synth.cancel();setTalking(false)}
+function stopSpeech(){if(audio){audio.pause();audio=null}if(synth)synth.cancel();setState('idle')}
 function pickVoice(){const vs=synth.getVoices();return vs.find(v=>/en-GB/.test(v.lang)&&/Daniel|Arthur|UK English Male/i.test(v.name))||vs.find(v=>/^en/.test(v.lang)&&/Natural|Google|Daniel|Alex/i.test(v.name))||vs.find(v=>/^en/.test(v.lang))}
 async function speak(t){
   if(!voice)return;stopSpeech();
-  // Prefer the server voice (cloned voice) when configured; fall back to the browser voice.
   try{
     const r=await fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:t})});
-    if(r.ok){const b=await r.blob();audio=new Audio(URL.createObjectURL(b));audio.onplay=()=>setTalking(true);audio.onended=audio.onerror=()=>setTalking(false);await audio.play();return}
+    if(r.ok){const b=await r.blob();audio=new Audio(URL.createObjectURL(b));audio.onplay=()=>setState('talking');audio.onended=audio.onerror=()=>setState('idle');await audio.play();return}
   }catch{}
-  if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pickVoice();if(v)u.voice=v;u.rate=1.03;u.onstart=()=>setTalking(true);u.onend=u.onerror=()=>setTalking(false);synth.speak(u);
+  if(!synth)return;const u=new SpeechSynthesisUtterance(t);const v=pickVoice();if(v)u.voice=v;u.rate=1.03;u.onstart=()=>setState('talking');u.onend=u.onerror=()=>setState('idle');synth.speak(u);
 }
+function add(cls,t){const d=document.createElement('div');d.className='msg '+cls;d.textContent=t;log.appendChild(d);log.scrollTop=log.scrollHeight;return d}
 async function ask(text){
   text=text.trim();if(busy||!text)return;busy=true;send.disabled=true;stopSpeech();
   if(!intro.paused){intro.pause();intro.classList.add('hidden')}
-  introText.hidden=true;chips.style.display='none';say.hidden=false;say.classList.remove('err');
-  say.innerHTML='';const qd=document.createElement('span');qd.className='q';qd.textContent='“'+text+'”';const ad=document.createElement('span');ad.textContent='…';say.append(qd,ad);
-  history.push({role:'user',content:text});q.value='';frame.classList.add('thinking');let out='';
+  chips.style.display='none';add('me',text);history.push({role:'user',content:text});q.value='';
+  const d=add('ai typing','');setState('thinking');let out='';
   try{
     const r=await fetch('/api/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({messages:history})});
     if(!r.ok){let m='Something went wrong. Try again in a moment.';try{m=(await r.json()).error||m}catch{}throw new Error(m)}
-    const rd=r.body.getReader(),dec=new TextDecoder();frame.classList.remove('thinking');
-    if(!voice)setTalking(true);
-    for(;;){const {done,value}=await rd.read();if(done)break;out+=dec.decode(value,{stream:true});ad.textContent=out;say.scrollTop=say.scrollHeight}
-    history.push({role:'assistant',content:out});
-    if(voice)speak(out);else setTimeout(()=>setTalking(false),400);
-  }catch(e){ad.textContent=e.message;say.classList.add('err');history.pop()}
-  finally{frame.classList.remove('thinking');busy=false;send.disabled=false;q.focus()}
+    const rd=r.body.getReader(),dec=new TextDecoder();setState(voice?'thinking':'talking');
+    for(;;){const {done,value}=await rd.read();if(done)break;out+=dec.decode(value,{stream:true});d.textContent=out;log.scrollTop=log.scrollHeight}
+    d.classList.remove('typing');history.push({role:'assistant',content:out});
+    if(voice)speak(out);else setState('idle');
+  }catch(e){d.textContent=e.message;d.classList.remove('typing');d.classList.add('err');history.pop();setState('idle')}
+  finally{busy=false;send.disabled=false;q.focus()}
 }
 f.onsubmit=e=>{e.preventDefault();ask(q.value)};
 chips.querySelectorAll('button').forEach(b=>b.onclick=()=>ask(b.textContent));
-
-// Ask out loud (where the browser supports speech recognition)
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(SR){mic.hidden=false;let rec=null;mic.onclick=()=>{
   if(rec){rec.stop();return}
